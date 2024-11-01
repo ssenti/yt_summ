@@ -24,10 +24,5 @@ jobs:
     - name: Sync with Hugging Face Space
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
-      run: |
-        # Add Hugging Face Space as a remote with token embedded directly in URL
-        git remote add hf https://${{ secrets.HF_TOKEN }}@huggingface.co/spaces/SSenti/yt_summ
-
-        # Force push to the Hugging Face Space
-        git push hf main -f
+      run: git push https://SSenti:$HF_TOKEN@huggingface.co/spaces/SSenti/yt_summ main
 

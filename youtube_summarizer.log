@@ -1,0 +1,17 @@
+2024-11-02 02:32:32,291 - INFO - HTTP Request: GET http://127.0.0.1:7860/gradio_api/startup-events "HTTP/1.1 200 OK"
+2024-11-02 02:32:32,299 - INFO - HTTP Request: HEAD http://127.0.0.1:7860/ "HTTP/1.1 200 OK"
+2024-11-02 02:32:33,112 - INFO - HTTP Request: GET https://api.gradio.app/pkg-version "HTTP/1.1 200 OK"
+2024-11-02 02:32:33,230 - INFO - HTTP Request: GET https://api.gradio.app/v3/tunnel-request "HTTP/1.1 200 OK"
+2024-11-02 02:32:33,484 - INFO - HTTP Request: GET https://cdn-media.huggingface.co/frpc-gradio-0.3/frpc_darwin_arm64 "HTTP/1.1 200 OK"
+2024-11-02 02:33:04,733 - INFO - Extracted video ID: 8zX_HDD4_sc
+2024-11-02 02:33:05,239 - INFO - Korean transcript not found. Trying English.
+2024-11-02 02:33:05,239 - INFO - Found English transcript.
+2024-11-02 02:33:05,362 - INFO - Transcript fetched successfully.
+2024-11-02 02:33:05,566 - INFO - Detected language: en
+2024-11-02 02:33:08,394 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-11-02 02:33:26,056 - INFO - Extracted video ID: 8zX_HDD4_sc
+2024-11-02 02:33:26,548 - INFO - Korean transcript not found. Trying English.
+2024-11-02 02:33:26,548 - INFO - Found English transcript.
+2024-11-02 02:33:26,666 - INFO - Transcript fetched successfully.
+2024-11-02 02:33:26,672 - INFO - Detected language: en
+2024-11-02 02:33:27,644 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"

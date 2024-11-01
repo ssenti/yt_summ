@@ -3,7 +3,7 @@ name: Deploy to Hugging Face Space
 on:
   push:
     branches:
-      - main  # Or the branch you want to sync
+      - main  # Or the branch you want to syncc
 
 jobs:
   deploy:

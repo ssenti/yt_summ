@@ -1,5 +1,3 @@
-# Youtube Transcript Summarizer
-
 ```yaml
 ---
 title: Youtube Transcript Summarizer
@@ -12,6 +10,9 @@ app_file: yt_summ_gradio.py
 pinned: true
 ---
 ```
+
+# Youtube Transcript Summarizer
+summarize most youtube videos with gpt-4o in 3 seconds
 
 
 ## Usage

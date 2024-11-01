@@ -3,7 +3,7 @@ name: Deploy to Hugging Face Space
 on:
   push:
     branches:
-      - main  # Or the branch you want to syncc
+      - main  # Or the branch you want to sync
 
 jobs:
   deploy:
@@ -25,8 +25,9 @@ jobs:
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
       run: |
-        # Add Hugging Face Space as a remote
-        git remote add hf https://USER:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/SSenti/yt_summ
+        # Add Hugging Face Space as a remote with token embedded directly in URL
+        git remote add hf https://${{ secrets.HF_TOKEN }}@huggingface.co/spaces/SSenti/yt_summ
 
-        # Push changes forcefully to the Hugging Face Space
+        # Force push to the Hugging Face Space
         git push hf main -f
+

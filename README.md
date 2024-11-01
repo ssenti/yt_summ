@@ -12,7 +12,7 @@ pinned: true
 ```
 
 # Youtube Transcript Summarizer
-summarize most youtube videos with gpt-4o in 3 seconds
+Summarize most youtube videos with gpt-4o in 3 seconds
 
 
 ## Usage

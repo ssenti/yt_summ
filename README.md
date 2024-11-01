@@ -1,6 +1,5 @@
 # Youtube Transcript Summarizer
 
----
 title: "Youtube Transcript Summarizer"   
 emoji: "🚀"                            
 colorFrom: "blue"                      
@@ -8,8 +7,7 @@ colorTo: "green"
 sdk: "gradio"                       
 sdk_version: "5.4"                    
 app_file: yt_summ_gradio.py          
-pinned: true                    
----
+pinned: true                
 
 ## Usage
 

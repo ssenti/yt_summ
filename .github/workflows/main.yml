@@ -1,19 +1,32 @@
-name: Sync to Hugging Face hub
+name: Deploy to Hugging Face Space
+
 on:
   push:
-    branches: [main]
-  # to run this workflow manually from the Actions tab
-  workflow_dispatch:
+    branches:
+      - main  # Or the branch you want to sync
 
 jobs:
-  sync-to-hub:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          lfs: true
-      - name: Push to hub
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push https://SSenti:$HF_TOKEN@huggingface.co/spaces/SSenti/yt_summ main
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetch full history
+
+    - name: Install Git LFS
+      run: |
+        sudo apt-get update
+        sudo apt-get install git-lfs
+        git lfs install
+
+    - name: Sync with Hugging Face Space
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: |
+        # Add Hugging Face Space as a remote
+        git remote add hf https://USER:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/SSenti/yt_summ
+
+        # Push changes forcefully to the Hugging Face Space
+        git push hf main -f

@@ -1,5 +1,6 @@
 # Youtube Transcript Summarizer
 
+```yaml
 ---
 title: {{Youtube Transcript Summarizer}}
 emoji: {{📝}}
@@ -8,8 +9,9 @@ colorTo: {{green}}
 sdk: {{gradio}}
 sdk_version: "5.4"
 app_file: yt_summ_gradio.py
-pinned: false
+pinned: true
 ---
+```
 
 
 ## Usage

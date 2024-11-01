@@ -1,11 +1,11 @@
 ```yaml
 ---
-title: Demo Space
+title: yt_summ
 emoji: 🤗
 colorFrom: yellow
 colorTo: orange
 sdk: gradio
-app_file: app.py
+app_file: yt_summ_gradio.py
 pinned: false
 ---
 ```

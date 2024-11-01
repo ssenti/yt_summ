@@ -11,10 +11,6 @@ app_file: yt_summ_gradio.py
 pinned: true                    
 ---
 
-# Your Space Title
-This is a description of your Hugging Face Space.
-
-
 ## Usage
 
 1. Clone the repo:

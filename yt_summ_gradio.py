@@ -154,7 +154,7 @@ def create_gradio_interface():
 
         # Submit button
         with gr.Row():
-            submit_btn = gr.Button("Submit", visible=False)
+            submit_btn = gr.Button("Submit Prompt", visible=False)
 
         # Move paste and copy buttons above the summary buttons
         with gr.Row():
@@ -272,7 +272,7 @@ def create_gradio_interface():
 if __name__ == "__main__":
     demo = create_gradio_interface()
     demo.launch(
-        share=True,
+        share=False,
         inbrowser=True,
         debug=True
     ) 

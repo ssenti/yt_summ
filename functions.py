@@ -90,16 +90,17 @@ def get_transcript(video_id):
         return full_text, transcript.language
 
     except TranscriptsDisabled:
-        logging.error("Transcripts are disabled for this video.")
-        return None, None
+        error_msg = "Transcripts are disabled for this video by the content creator."
+        logging.error(error_msg)
+        return None, error_msg
     except NoTranscriptFound:
-        logging.error("No transcript found for this video.")
-        return None, None
+        error_msg = "No transcript is available for this video in any language."
+        logging.error(error_msg)
+        return None, error_msg
     except Exception as e:
-        logging.error(f"An error occurred while fetching the transcript: {e}")
-        return None, None
-
-
+        error_msg = f"Error fetching transcript: {str(e)}. This might be due to network issues or API restrictions."
+        logging.error(error_msg)
+        return None, error_msg
 
 def detect_language(text):
     """

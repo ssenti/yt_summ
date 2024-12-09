@@ -50,9 +50,9 @@ def process_summary(youtube_url, api_key, selected_model, output_language, summa
             return "Invalid YouTube URL. Please check and try again.", "No summary generated."
 
         # Fetch transcript
-        transcript, transcript_language = get_transcript(video_id)
+        transcript, error_or_language = get_transcript(video_id)
         if not transcript:
-            return "Failed to retrieve transcript.", "No summary generated."
+            return f"Failed to retrieve transcript: {error_or_language}", "No summary generated."
 
         # Detect language
         language = detect_language(transcript)

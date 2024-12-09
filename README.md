@@ -27,15 +27,6 @@ A web application that generates summaries of YouTube videos using an LLM
 
 - Python 3.6+
 - X.AI API key (starts with 'xai-'): ask Crimson for his API key for now if you don't know how to get it
-- Required packages:
-  - gradio==5.4.0
-  - openai==1.12.0
-  - youtube_transcript_api==0.6.2
-  - python-dotenv==1.0.1
-  - langdetect==1.0.9
-  - pyperclip==1.8.2
-  - fpdf==1.7.2
-  - fpdf2==2.7.6
 
 ## Installation
 

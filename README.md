@@ -45,7 +45,7 @@ pip install -r requirements.txt
 
 1. Run the application:
 ```
-python3 yt_summ_gradio.py
+python3 api/yt_summ_gradio.py
 ```
 2. Enter a YouTube URL and your X.AI API key
 3. Choose your desired summary type:

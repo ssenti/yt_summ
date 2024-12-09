@@ -10,7 +10,7 @@ short_description: youtube video summarization tool
 license: mit
 ---
 
-# YouTube Video Summarizer (yt_summ) 🤗
+# YouTube Video Summarizer
 
 A web application that generates summaries of YouTube videos using an LLM
 
@@ -32,14 +32,14 @@ A web application that generates summaries of YouTube videos using an LLM
 
 1. Clone the repository
 2. Install dependencies:
-'''bash
+'''
 pip install -r requirements.txt
 '''
 
 ## Usage
 
 1. Run the application:
-'''bash
+'''
 python yt_summ_gradio.py
 '''
 2. Enter a YouTube URL and your X.AI API key

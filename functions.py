@@ -6,6 +6,7 @@ import pyperclip
 from fpdf import FPDF
 import logging
 from langdetect import detect, LangDetectException
+from openai import OpenAI
 
 # Configure Logging
 logging.basicConfig(
@@ -98,6 +99,8 @@ def get_transcript(video_id):
         logging.error(f"An error occurred while fetching the transcript: {e}")
         return None, None
 
+
+
 def detect_language(text):
     """
     Detects the language of the given text.
@@ -110,19 +113,18 @@ def detect_language(text):
         logging.error(f"Language detection failed: {e}")
         return 'en'  # Default to English if detection fails
 
-def summarize_text(text, api_key, model="gpt-4o-latest", max_tokens=300, language='en'):
+def summarize_text(text, api_key, model="grok-beta", max_tokens=300, language='en'):
     """
-    Summarizes the provided text using OpenAI's GPT model in a single API request.
-    Retrieves model version, tokens used, and calculates expected cost.
-    Generates summary in the specified language.
+    Summarizes the provided text using X.AI's Grok model in a single API request.
+    Retrieves tokens used and generates summary in the specified language.
     """
-    openai.api_key = api_key
+    client = get_client(api_key)
 
     # Prepare the prompt with language specification
     prompt = f"Please provide a concise summary in {language} for the following transcript without using any markdown formatting:\n\n{text}"
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "system", "content": "You are an assistant that summarizes text."},
@@ -132,52 +134,26 @@ def summarize_text(text, api_key, model="gpt-4o-latest", max_tokens=300, languag
             temperature=0.5,
         )
 
-        summary = response.choices[0].message['content'].strip()
+        summary = response.choices[0].message.content.strip()
         logging.info("Summary generated successfully.")
 
         # Extract usage details
-        usage = response['usage']
-        prompt_tokens = usage.get('prompt_tokens', 0)
-        completion_tokens = usage.get('completion_tokens', 0)
-        total_tokens = usage.get('total_tokens', 0)
-
-        # Determine the model used
-        model_used = response.get('model', model)
-
-        # Calculate expected cost
-        if model_used in model_prices:
-            prompt_cost = (prompt_tokens / 1000) * model_prices[model_used]['prompt']
-            completion_cost = (completion_tokens / 1000) * model_prices[model_used]['completion']
-            total_cost = prompt_cost + completion_cost
-            total_cost = round(total_cost, 6)
-            logging.info(f"Model Used: {model_used}, Prompt Tokens: {prompt_tokens}, Completion Tokens: {completion_tokens}, Total Tokens: {total_tokens}, Expected Cost: ${total_cost} USD")
-        else:
-            prompt_cost = completion_cost = total_cost = None
-            logging.warning(f"Model pricing not found for model: {model_used}")
+        usage = response.usage
+        prompt_tokens = usage.prompt_tokens
+        completion_tokens = usage.completion_tokens
+        total_tokens = usage.total_tokens
 
         return {
             "summary": summary,
-            "model_used": model_used,
+            "model_used": model,
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
             "total_tokens": total_tokens,
-            "expected_cost": total_cost
+            "expected_cost": None  # Grok pricing not public
         }
 
-    except openai.error.InvalidRequestError as e:
-        logging.error(f"InvalidRequestError: {e}")
-        return None
-    except openai.error.AuthenticationError:
-        logging.error("AuthenticationError: Check your OpenAI API key.")
-        return None
-    except openai.error.APIConnectionError:
-        logging.error("APIConnectionError: Check your internet connection.")
-        return None
-    except openai.error.OpenAIError as e:
-        logging.error(f"OpenAIError: {e}")
-        return None
     except Exception as e:
-        logging.error(f"Unexpected error: {e}")
+        logging.error(f"Error generating summary: {e}")
         return None
 
 def save_as_txt(text):
@@ -244,8 +220,8 @@ def generate_full_summary(event=None):
         return
 
     if not api_key:
-        status_label.config(text="Please enter your OpenAI API key.")
-        logging.warning("User did not enter an OpenAI API key.")
+        status_label.config(text="Please enter your API key.")
+        logging.warning("User did not enter an API key.")
         return
 
     video_id = extract_video_id(youtube_url)
@@ -325,8 +301,8 @@ def generate_concise_summary(event=None):
         return
 
     if not api_key:
-        status_label.config(text="Please enter your OpenAI API key.")
-        logging.warning("User did not enter an OpenAI API key.")
+        status_label.config(text="Please enter your API key.")
+        logging.warning("User did not enter an API key.")
         return
 
     video_id = extract_video_id(youtube_url)
@@ -454,8 +430,8 @@ def generate_custom_prompt(event=None):
         return
 
     if not api_key:
-        status_label.config(text="Please enter your OpenAI API key.")
-        logging.warning("User did not enter an OpenAI API key.")
+        status_label.config(text="Please enter your API key.")
+        logging.warning("User did not enter an API key.")
         return
 
     if not custom_prompt:
@@ -571,4 +547,24 @@ def toggle_prompt_entry(event=None):
         custom_prompt_frame.grid_remove()
     else:
         custom_prompt_frame.grid()
+
+def get_client(api_key):
+    """
+    Creates and returns an OpenAI client instance with the provided API key.
+    """
+    try:
+
+
+        XAI_API_KEY = api_key
+        client = OpenAI(
+            api_key=XAI_API_KEY,
+            base_url="https://api.x.ai/v1",
+        )
+        logging.info("XAI client created successfully")
+
+
+        return client
+    except Exception as e:
+        logging.error(f"Error creating XAI client: {e}")
+        raise
 

@@ -1,23 +1,23 @@
 import gradio as gr
-import openai
 import logging
 import pyperclip
 import json
+import os
+from openai import OpenAI
 
-# Load environment variables and configure logging (same as original)
+# Load environment variables and configure logging
 logging.basicConfig(
     filename='youtube_summarizer.log',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# Import the model prices and backend functions from original script
+# Import the backend functions from original script
 from functions import (
-    model_prices,
     extract_video_id,
     get_transcript,
     detect_language,
-    summarize_text
+    get_client
 )
 
 def copy_to_clipboard(summary_text):
@@ -38,81 +38,76 @@ def process_summary(youtube_url, api_key, selected_model, output_language, summa
     if not youtube_url or not api_key:
         return "Please provide both YouTube URL and API key.", "No summary generated."
 
-    openai.api_key = api_key
-
-    # Extract video ID
-    video_id = extract_video_id(youtube_url)
-    if not video_id:
-        return "Invalid YouTube URL. Please check and try again.", "No summary generated."
-
-    # Fetch transcript
-    transcript, transcript_language = get_transcript(video_id)
-    if not transcript:
-        return "Failed to retrieve transcript.", "No summary generated."
-
-    # Detect language
-    language = detect_language(transcript)
-    summary_language = "English" if output_language == "English" else language
-
-    # Prepare prompt based on summary type
-    if summary_type == "short":
-        prompt = (
-            f"Please provide a very concise summary of the following transcript in {summary_language}, "
-            f"using a maximum of 4 sentences in bullet points.\n\n{transcript}"
-        )
-    elif summary_type == "custom":
-        if not custom_prompt:
-            return "Please provide a custom prompt.", "No summary generated."
-        prompt = f"Please {custom_prompt} in {summary_language} for the following transcript without using any markdown formatting:\n\n{transcript}"
-    else:  # full summary
-        prompt = f"Please provide a comprehensive summary in {summary_language} for the following transcript without using any markdown formatting:\n\n{transcript}"
+    if not api_key.startswith('xai-'):
+        return "Invalid API key format. X.AI API keys should start with 'xai-'", "No summary generated."
 
     try:
-        response = openai.chat.completions.create(
-            model=selected_model,
-            messages=[
-                {"role": "system", "content": "You are an assistant that summarizes text."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=1000,
-            temperature=0.5,
-        )
-
-        summary = response.choices[0].message.content.strip()
+        client = get_client(api_key)
         
-        # Extract usage details
-        usage = response.usage
-        model_used = selected_model
-        prompt_tokens = usage.prompt_tokens
-        completion_tokens = usage.completion_tokens
-        total_tokens = usage.total_tokens
+        # Extract video ID
+        video_id = extract_video_id(youtube_url)
+        if not video_id:
+            return "Invalid YouTube URL. Please check and try again.", "No summary generated."
 
-        # Calculate cost
-        if model_used in model_prices:
-            prompt_cost = (prompt_tokens / 1000) * model_prices[model_used]['prompt']
-            completion_cost = (completion_tokens / 1000) * model_prices[model_used]['completion']
-            total_cost = round(prompt_cost + completion_cost, 6)
-        else:
-            total_cost = None
+        # Fetch transcript
+        transcript, transcript_language = get_transcript(video_id)
+        if not transcript:
+            return "Failed to retrieve transcript.", "No summary generated."
 
+        # Detect language
+        language = detect_language(transcript)
+        summary_language = "English" if output_language == "English" else language
 
-        expected_cost_krw = round(total_cost * 1378.28) if total_cost is not None else 'N/A'
-        # Prepare additional info
-        additional_info = (
-            f"Expected Cost (KRW): ₩{expected_cost_krw}\n"
-            f"Expected Cost (USD): ${total_cost if total_cost is not None else 'N/A'}\n"
-            f"Tokens Used:\n"
-            f"  - Prompt Tokens: {prompt_tokens}\n"
-            f"  - Completion Tokens: {completion_tokens}\n"
-            f"  - Total Tokens: {total_tokens}\n"
+        # Prepare prompt based on summary type
+        if summary_type == "short":
+            prompt = (
+                f"Please provide a very concise summary of the following transcript in {summary_language}, "
+                f"using a maximum of 4 sentences in bullet points.\n\n{transcript}"
+            )
+        elif summary_type == "custom":
+            if not custom_prompt:
+                return "Please provide a custom prompt.", "No summary generated."
+            prompt = f"Please {custom_prompt} in {summary_language} for the following transcript without using any markdown formatting:\n\n{transcript}"
+        else:  # full summary
+            prompt = f"Please provide a comprehensive summary in {summary_language} for the following transcript without using any markdown formatting:\n\n{transcript}"
+
+        try:
+            response = client.chat.completions.create(
+                model="grok-beta",
+                messages=[
+                    {"role": "system", "content": "You are an assistant that summarizes text."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=1000,
+                temperature=0.5,
+            )
+
+            summary = response.choices[0].message.content.strip()
             
-        )
+            # Extract usage details
+            usage = response.usage
+            prompt_tokens = usage.prompt_tokens
+            completion_tokens = usage.completion_tokens
+            total_tokens = usage.total_tokens
 
-        return summary, additional_info
+            # Prepare additional info
+            additional_info = (
+                f"Model: grok-beta\n"
+                f"Tokens Used:\n"
+                f"  - Prompt Tokens: {prompt_tokens}\n"
+                f"  - Completion Tokens: {completion_tokens}\n"
+                f"  - Total Tokens: {total_tokens}\n"
+            )
+
+            return summary, additional_info
+
+        except Exception as e:
+            logging.error(f"API Error: {str(e)}")
+            return f"Error calling X.AI API: {str(e)}", "Error occurred"
 
     except Exception as e:
-        logging.error(f"Error generating summary: {e}")
-        return f"Error generating summary: {str(e)}", "Error occurred"
+        logging.error(f"Error in process_summary: {e}")
+        return f"Error: {str(e)}", "Error occurred"
 
 def create_gradio_interface():
     """

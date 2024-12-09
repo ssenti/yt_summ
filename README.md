@@ -31,7 +31,12 @@ A web application that generates summaries of YouTube videos using an LLM
 ## Installation
 
 1. Clone the repository
-2. Install dependencies:
+2. Create virtual environment
+```
+python3 -m venv crimson_is_the_best
+source crimson_is_the_best/bin/activate
+```
+3. Install dependencies:
 ```
 pip install -r requirements.txt
 ```
@@ -40,7 +45,7 @@ pip install -r requirements.txt
 
 1. Run the application:
 ```
-python yt_summ_gradio.py
+python3 yt_summ_gradio.py
 ```
 2. Enter a YouTube URL and your X.AI API key
 3. Choose your desired summary type:

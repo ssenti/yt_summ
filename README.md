@@ -32,16 +32,16 @@ A web application that generates summaries of YouTube videos using an LLM
 
 1. Clone the repository
 2. Install dependencies:
-'''
+```
 pip install -r requirements.txt
-'''
+```
 
 ## Usage
 
 1. Run the application:
-'''
+```
 python yt_summ_gradio.py
-'''
+```
 2. Enter a YouTube URL and your X.AI API key
 3. Choose your desired summary type:
    - Full Summary

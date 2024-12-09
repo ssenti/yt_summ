@@ -127,16 +127,16 @@ def create_gradio_interface():
                 placeholder="Enter YouTube video URL here..."
             )
             api_key = gr.Textbox(
-                label="OpenAI API Key",
-                placeholder="Enter your OpenAI API key here...",
+                label="API Key",
+                placeholder="Enter your X.AI API key here...",
                 type="password"
             )
 
         with gr.Row():
-            model_dropdown = gr.Dropdown(
-                choices=list(model_prices.keys()),
-                value="chatgpt-4o-latest" if "chatgpt-4o-latest" in model_prices else list(model_prices.keys())[0],
-                label="GPT Model"
+            model_name = gr.Textbox(
+                value="grok-beta",
+                label="Model Name",
+                interactive=False
             )
             language_dropdown = gr.Dropdown(
                 choices=["English", "Original Language"],
@@ -203,12 +203,12 @@ def create_gradio_interface():
                 gr.update(visible=True),  # copy_btn
             ]
 
-        # Update the click handlers to remove file-related outputs
+        # Update the click handlers to use the new model_name input
         submit_btn.click(
             fn=lambda url, key, model, lang, prompt: process_and_show_buttons(
                 url, key, model, lang, "custom", prompt
             ),
-            inputs=[youtube_url, api_key, model_dropdown, language_dropdown, custom_prompt],
+            inputs=[youtube_url, api_key, model_name, language_dropdown, custom_prompt],
             outputs=[
                 summary_output,
                 additional_info,
@@ -242,12 +242,12 @@ def create_gradio_interface():
             api_name="copy"
         )
 
-        # Update the full and short summary buttons to hide custom prompt
+        # Update the full and short summary buttons to use the new model_name input
         full_summary_btn.click(
             fn=lambda url, key, model, lang: process_and_show_buttons(
                 url, key, model, lang, "full", ""
             ),
-            inputs=[youtube_url, api_key, model_dropdown, language_dropdown],
+            inputs=[youtube_url, api_key, model_name, language_dropdown],
             outputs=[
                 summary_output,
                 additional_info,
@@ -259,7 +259,7 @@ def create_gradio_interface():
             fn=lambda url, key, model, lang: process_and_show_buttons(
                 url, key, model, lang, "short", ""
             ),
-            inputs=[youtube_url, api_key, model_dropdown, language_dropdown],
+            inputs=[youtube_url, api_key, model_name, language_dropdown],
             outputs=[
                 summary_output,
                 additional_info,

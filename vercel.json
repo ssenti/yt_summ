@@ -1,9 +1,17 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/yt_summ_gradio.py", "use": "@vercel/python" }
+    {
+      "src": "api/yt_summ_gradio.py",
+      "use": "@vercel/python"
+    }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "api/yt_summ_gradio.py" }
+    {
+      "src": "/(.*)",
+      "dest": "api/yt_summ_gradio.py"
+    }
   ]
 } 
+
+  

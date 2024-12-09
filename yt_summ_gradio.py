@@ -3,13 +3,17 @@ import logging
 import pyperclip
 import json
 import os
+import sys
 from openai import OpenAI
 
-# Load environment variables and configure logging
+# Configure logging to output to both file and stdout
 logging.basicConfig(
-    filename='youtube_summarizer.log',
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),  # Log to stdout for Hugging Face logs
+        logging.FileHandler('youtube_summarizer.log')  # Also keep file logging
+    ]
 )
 
 # Import the backend functions from original script

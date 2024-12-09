@@ -67,8 +67,22 @@ def get_transcript(video_id):
     Retrieves the transcript for the given YouTube video ID.
     Attempts Korean first, then English, then any available language.
     """
+    logging.info(f"Attempting to fetch transcript for video ID: {video_id}")
     try:
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        # Add timeout for the API call
+        import socket
+        socket.setdefaulttimeout(15)  # 15 seconds timeout
+        
+        logging.info("Calling YouTubeTranscriptApi.list_transcripts")
+        try:
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        except Exception as api_init_error:
+            error_msg = f"Failed to initialize YouTube API: {str(api_init_error)}. This might be due to network restrictions or API changes."
+            logging.error(error_msg)
+            return None, error_msg
+            
+        logging.info(f"Available transcript languages: {transcript_list._languages}")
+        
         # Attempt Korean
         try:
             transcript = transcript_list.find_transcript(['ko'])
@@ -89,12 +103,12 @@ def get_transcript(video_id):
         logging.info("Transcript fetched successfully.")
         return full_text, transcript.language
 
-    except TranscriptsDisabled:
-        error_msg = "Transcripts are disabled for this video by the content creator."
+    except TranscriptsDisabled as e:
+        error_msg = f"Transcripts are disabled for this video by the content creator. Error details: {str(e)}"
         logging.error(error_msg)
         return None, error_msg
-    except NoTranscriptFound:
-        error_msg = "No transcript is available for this video in any language."
+    except NoTranscriptFound as e:
+        error_msg = f"No transcript is available for this video in any language. Error details: {str(e)}"
         logging.error(error_msg)
         return None, error_msg
     except Exception as e:

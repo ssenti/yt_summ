@@ -59,7 +59,6 @@ export default function YoutubeSummarizer() {
   const [youtubeUrl, setYoutubeUrl] = useState('')
   const [apiKey, setApiKey] = useState('')
   const [outputLanguage, setOutputLanguage] = useState<'english' | 'korean' | LanguageCode>('english')
-  const [showCustomPrompt, setShowCustomPrompt] = useState(false)
   const [customPrompt, setCustomPrompt] = useState('')
   const [summary, setSummary] = useState('')
   const [response, setResponse] = useState<SummaryResponse | null>(null)
@@ -153,13 +152,6 @@ export default function YoutubeSummarizer() {
   const handleShortSummary = () => handleSummarize('short')
   const handleSubmitPrompt = () => handleSummarize('custom')
 
-  const handleCustomPrompt = () => {
-    setShowCustomPrompt(true)
-    setTimeout(() => {
-      customPromptRef.current?.focus()
-    }, 0)
-  }
-
   const handlePasteYoutubeUrl = async () => {
     try {
       const text = await navigator.clipboard.readText()
@@ -206,16 +198,12 @@ export default function YoutubeSummarizer() {
   // Update keyboard shortcuts
   useKeyboardShortcut({ key: 'f', callback: handleFullSummary })
   useKeyboardShortcut({ key: 's', callback: handleShortSummary })
-  useKeyboardShortcut({ key: 'p', callback: handleCustomPrompt })
-  useKeyboardShortcut({ key: 'v', callback: handlePasteYoutubeUrl, shiftKey: true })
-  useKeyboardShortcut({
-    key: 'enter',
-    callback: () => {
-      if (showCustomPrompt && customPrompt) {
-        handleSubmitPrompt()
-      }
+  useKeyboardShortcut({ key: 'p', callback: () => {
+    if (customPrompt.trim()) {
+      handleSubmitPrompt()
     }
-  })
+  }})
+  useKeyboardShortcut({ key: 'enter', callback: handlePasteYoutubeUrl })
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -237,12 +225,13 @@ export default function YoutubeSummarizer() {
               placeholder="https://www.youtube.com/watch?v=..." 
               value={youtubeUrl}
               onChange={(e) => setYoutubeUrl(e.target.value)}
+              className="flex-1"
             />
             <Button 
               onClick={handlePasteYoutubeUrl}
-              className="bg-black hover:bg-black/90 text-white text-sm font-medium"
+              className="bg-black hover:bg-black/90 text-white text-sm font-medium w-[23%]"
             >
-              Paste URL (⌘⇧V)
+              Paste URL (⌘Enter)
             </Button>
           </div>
         </div>
@@ -254,7 +243,7 @@ export default function YoutubeSummarizer() {
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder="xAI API is currently free, ask Crimson if confused about the API Key..."
+            placeholder="xAI is currently giving out free credits..."
           />
         </div>
         
@@ -294,52 +283,41 @@ export default function YoutubeSummarizer() {
           </div>
         </div>
         
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <Button 
             onClick={handleFullSummary} 
             disabled={isLoading}
-            className="bg-black hover:bg-black/90 text-white text-sm font-medium"
+            className="bg-black hover:bg-black/90 text-white text-sm font-medium w-full"
           >
             {isLoading ? 'Generating...' : 'Full Summary (⌘F)'}
           </Button>
           <Button 
             onClick={handleShortSummary}
             disabled={isLoading}
-            className="bg-black hover:bg-black/90 text-white text-sm font-medium"
+            className="bg-black hover:bg-black/90 text-white text-sm font-medium w-full"
           >
             {isLoading ? 'Generating...' : 'Short Summary (⌘S)'}
           </Button>
           <Button 
-            onClick={handleCustomPrompt}
-            disabled={isLoading}
-            className="bg-black hover:bg-black/90 text-white text-sm font-medium"
+            onClick={handleSubmitPrompt}
+            disabled={isLoading || !customPrompt.trim()}
+            className="bg-black hover:bg-black/90 text-white text-sm font-medium w-full"
           >
-            Custom Prompt (⌘P)
+            {isLoading ? 'Generating...' : 'Submit Custom Prompt (⌘P)'}
           </Button>
-          {showCustomPrompt && (
-            <Button 
-              onClick={handleSubmitPrompt}
-              disabled={isLoading}
-              className="bg-black hover:bg-black/90 text-white text-sm font-medium"
-            >
-              {isLoading ? 'Generating...' : 'Submit (⌘Ent)'}
-            </Button>
-          )}
         </div>
         
-        {showCustomPrompt && (
-          <div className="space-y-2">
-            <Label htmlFor="custom-prompt" className="font-bold">Custom Prompt (Optional)</Label>
-            <Textarea 
-              id="custom-prompt" 
-              placeholder="Enter your custom prompt here..."
-              value={customPrompt}
-              onChange={(e) => setCustomPrompt(e.target.value)}
-              ref={customPromptRef}
-              className="h-[100px] resize-none overflow-y-auto"
-            />
-          </div>
-        )}
+        <div className="space-y-2">
+          <Label htmlFor="custom-prompt" className="font-bold">Custom Prompt (Optional)</Label>
+          <Textarea 
+            id="custom-prompt" 
+            placeholder="Enter your custom prompt here and then press submit..."
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            ref={customPromptRef}
+            className="h-[100px] resize-none overflow-y-auto"
+          />
+        </div>
         
         {error && (
           <div className="text-red-500 text-sm">
@@ -352,7 +330,9 @@ export default function YoutubeSummarizer() {
           <div className="h-[400px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto">
             {summary ? (
               <div className="w-full">
-                <ReactMarkdown className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-bold prose-strong:text-black dark:prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal">
+                <ReactMarkdown 
+                  className="prose prose-sm dark:prose-invert max-w-none prose-p:font-normal prose-p:my-1 prose-li:my-0 prose-ul:my-1 prose-ol:my-1 prose-headings:font-bold prose-strong:font-semibold prose-strong:text-black dark:prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal"
+                >
                   {summary}
                 </ReactMarkdown>
               </div>
@@ -414,7 +394,7 @@ export default function YoutubeSummarizer() {
             <div className="mt-2">
               <Textarea 
                 id="feature-request" 
-                placeholder="Feel free to request some additional features you would like to see on this website, it will be sent to Crimson's github repository as an issue. He'll look into it when he has some free time :)" 
+                placeholder="Feel free to request new features here, it will be sent to Crimson’s github repo as an issue…" 
                 value={featureRequest}
                 onChange={(e) => setFeatureRequest(e.target.value)}
                 className="h-[200px] resize-none overflow-y-auto"
@@ -426,14 +406,10 @@ export default function YoutubeSummarizer() {
           <div>
             <div className="flex justify-between items-center gap-2">
               <Label className="font-bold">Feature Request List</Label>
-              <a 
-                href={GITHUB_REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
-              >
-                View all on GitHub
-              </a>
+              <Input
+                className="w-28 h-7 text-xs invisible"
+                disabled
+              />
             </div>
             <div className="mt-2">
               <div className="h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background overflow-y-auto">
@@ -454,19 +430,8 @@ export default function YoutubeSummarizer() {
                       ))}
                   </ul>
                 ) : (
-                  <div className="text-muted-foreground space-y-2">
+                  <div className="text-muted-foreground">
                     <p>Feature requests will appear here...</p>
-                    <p className="text-xs">
-                      You can also view all feature requests on{' '}
-                      <a 
-                        href={GITHUB_REPO_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 underline"
-                      >
-                        GitHub Issues
-                      </a>
-                    </p>
                   </div>
                 )}
               </div>

@@ -1,9 +1,12 @@
-import gradio as gr
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import logging
 import sys
 from openai import OpenAI
+from typing import Optional
 
-# Configure logging to output to stdout only (no file logging in serverless)
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -11,6 +14,24 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout)
     ]
 )
+
+app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class SummaryRequest(BaseModel):
+    youtube_url: str
+    api_key: str
+    output_language: str = "English"
+    summary_type: str
+    custom_prompt: Optional[str] = ""
 
 def extract_video_id(url):
     """Extract video ID from YouTube URL"""
@@ -147,110 +168,25 @@ def process_summary(youtube_url, api_key, selected_model, output_language, summa
         logging.error(f"Error in process_summary: {e}")
         return f"Error: {str(e)}", "Error occurred"
 
-def create_gradio_interface():
-    """
-    Creates the Gradio interface for the YouTube Transcript Summarizer
-    """
-    with gr.Blocks(title="YouTube Transcript Summarizer") as demo:
-        gr.Markdown("# YouTube Transcript Summarizer")
-        
-        with gr.Row():
-            youtube_url = gr.Textbox(
-                label="YouTube Video URL",
-                placeholder="Enter YouTube video URL here..."
-            )
-            api_key = gr.Textbox(
-                label="API Key",
-                placeholder="Enter your X.AI API key here...",
-                type="password"
-            )
-
-        with gr.Row():
-            model_name = gr.Textbox(
-                value="grok-beta",
-                label="Model Name",
-                interactive=False
-            )
-            language_dropdown = gr.Dropdown(
-                choices=["English", "Original Language"],
-                value="English",
-                label="Output Language"
-            )
-
-        with gr.Row():
-            custom_prompt = gr.Textbox(
-                label="Custom Prompt (Optional)",
-                placeholder="Enter your custom prompt here...",
-                lines=3,
-                visible=False
-            )
-
-        with gr.Row():
-            submit_btn = gr.Button("Submit Prompt", visible=False)
-
-        with gr.Row():
-            full_summary_btn = gr.Button("Full Summary")
-            short_summary_btn = gr.Button("Short Summary")
-            custom_prompt_btn = gr.Button("Custom Prompt")
-
-        with gr.Row():
-            summary_output = gr.Textbox(
-                label="Summary",
-                lines=10,
-                show_copy_button=True
-            )
-        
-        with gr.Row():
-            additional_info = gr.Textbox(
-                label="Additional Information",
-                lines=6
-            )
-
-        def process_and_show_buttons(*args, **kwargs):
-            summary, info = process_summary(*args, **kwargs)
-            return [summary, info]
-
-        submit_btn.click(
-            fn=lambda url, key, model, lang, prompt: process_and_show_buttons(
-                url, key, model, lang, "custom", prompt
-            ),
-            inputs=[youtube_url, api_key, model_name, language_dropdown, custom_prompt],
-            outputs=[summary_output, additional_info]
+@app.post("/api/summarize")
+async def summarize(request: SummaryRequest):
+    try:
+        summary, additional_info = process_summary(
+            request.youtube_url,
+            request.api_key,
+            "grok-beta",
+            request.output_language,
+            request.summary_type,
+            request.custom_prompt
         )
+        return {
+            "success": True,
+            "summary": summary,
+            "additional_info": additional_info
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-        custom_prompt_btn.click(
-            fn=lambda: (
-                gr.update(visible=True),
-                gr.update(visible=True)
-            ),
-            inputs=[],
-            outputs=[custom_prompt, submit_btn]
-        )
-
-        full_summary_btn.click(
-            fn=lambda url, key, model, lang: process_and_show_buttons(
-                url, key, model, lang, "full", ""
-            ),
-            inputs=[youtube_url, api_key, model_name, language_dropdown],
-            outputs=[summary_output, additional_info]
-        )
-
-        short_summary_btn.click(
-            fn=lambda url, key, model, lang: process_and_show_buttons(
-                url, key, model, lang, "short", ""
-            ),
-            inputs=[youtube_url, api_key, model_name, language_dropdown],
-            outputs=[summary_output, additional_info]
-        )
-
-        return demo
-
-# Create the Gradio interface
-demo = create_gradio_interface()
-demo.queue(max_size=10)
-
-# For Vercel deployment
-app = demo.app
-
-if __name__ == "__main__":
-    demo.launch()
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy"}

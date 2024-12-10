@@ -51,6 +51,10 @@ interface SummaryResponse {
   additional_info: string;
 }
 
+interface ErrorResponse {
+  detail: string;
+}
+
 export default function YoutubeSummarizer() {
   const [youtubeUrl, setYoutubeUrl] = useState('')
   const [apiKey, setApiKey] = useState('')
@@ -84,7 +88,7 @@ export default function YoutubeSummarizer() {
 
   const API_URL = process.env.NODE_ENV === 'development' 
     ? 'http://localhost:8000' 
-    : '/api'
+    : ''
 
   // Load existing feature requests
   useEffect(() => {
@@ -121,6 +125,7 @@ export default function YoutubeSummarizer() {
     }, 100)
 
     try {
+      console.log('Making request to:', `${API_URL}/api/summarize`)
       const response = await fetch(`${API_URL}/api/summarize`, {
         method: 'POST',
         headers: {
@@ -135,17 +140,17 @@ export default function YoutubeSummarizer() {
         }),
       })
 
-      const data: SummaryResponse = await response.json()
+      const data = await response.json() as SummaryResponse | ErrorResponse
 
-      if (data.success) {
+      if (response.ok && 'success' in data && data.success) {
         setSummary(data.summary)
         setAdditionalInfo(data.additional_info)
       } else {
-        setError('Failed to generate summary')
+        setError('detail' in data ? data.detail : 'Failed to generate summary. Please check your API key and YouTube URL.')
       }
     } catch (error) {
-      setError('An error occurred while generating the summary')
       console.error('Summary generation error:', error)
+      setError('Network error or server is not responding. Please make sure the API server is running.')
     } finally {
       setIsLoading(false)
       if (loadingInterval.current) {

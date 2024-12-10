@@ -7,6 +7,7 @@ from fpdf import FPDF
 import logging
 from langdetect import detect, LangDetectException
 from openai import OpenAI
+import socket
 
 # Configure Logging
 logging.basicConfig(
@@ -125,7 +126,7 @@ def summarize_text(text, api_key, model="grok-beta", max_tokens=300, language='e
         logging.error(f"Error generating summary: {e}")
         return None
 
-def save_as_txt(text):
+def save_as_txt(text, file_path):
     """
     Saves the provided text to a TXT file.
     """
@@ -138,7 +139,7 @@ def save_as_txt(text):
         logging.error(f"Failed to save summary as TXT: {e}")
         return False
 
-def save_as_pdf(text):
+def save_as_pdf(text, file_path):
     """
     Saves the provided text to a PDF file.
     """

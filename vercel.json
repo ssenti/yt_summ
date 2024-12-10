@@ -6,7 +6,7 @@
       "use": "@vercel/python"
     },
     {
-      "src": "frontend/next.config.mjs",
+      "src": "frontend/package.json",
       "use": "@vercel/next"
     }
   ],
@@ -16,12 +16,8 @@
       "dest": "/api/yt_summ_gradio.py"
     },
     {
-      "handle": "filesystem"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/frontend/$1",
-      "continue": true
+      "dest": "frontend/$1"
     }
   ]
 } 

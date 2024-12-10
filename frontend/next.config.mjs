@@ -11,8 +11,6 @@ const nextConfig = {
     }
     return []
   },
-  // Ensure we can find the frontend directory
-  basePath: process.env.NODE_ENV === 'production' ? '/frontend' : '',
   // Disable image optimization in development
   images: {
     unoptimized: process.env.NODE_ENV === 'development'

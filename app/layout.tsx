@@ -16,20 +16,6 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "YouTube Summarizer",
   description: "Summarize YouTube videos quickly and efficiently",
-  icons: {
-    icon: [
-      {
-        url: '/icon/y9.png',
-        sizes: '32x32',
-        type: 'image/png',
-      },
-      {
-        url: '/icon/y9.png',
-        sizes: '16x16',
-        type: 'image/png',
-      }
-    ],
-  },
 };
 
 export default function RootLayout({

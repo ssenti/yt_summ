@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import ReactMarkdown from 'react-markdown'
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
+import type { SummaryResponse, ErrorResponse } from '@/types/api'
 
 // Common languages list
 const LANGUAGES = [
@@ -45,14 +46,10 @@ const LANGUAGES = [
 
 type LanguageCode = typeof LANGUAGES[number]['code']
 
-interface SummaryResponse {
-  success: boolean;
-  summary: string;
-  additional_info: string;
-}
-
-interface ErrorResponse {
-  detail: string;
+interface FeatureRequest {
+  request_text: string;
+  requester_name: string;
+  timestamp: string;
 }
 
 export default function YoutubeSummarizer() {
@@ -68,13 +65,8 @@ export default function YoutubeSummarizer() {
   const [loadingTime, setLoadingTime] = useState(0)
   const [featureRequest, setFeatureRequest] = useState('')
   const [requesterName, setRequesterName] = useState('')
-  const [featureRequests, setFeatureRequests] = useState<Array<{
-    request_text: string,
-    requester_name: string,
-    timestamp: string
-  }>>([])
+  const [featureRequests, setFeatureRequests] = useState<FeatureRequest[]>([])
   const loadingInterval = useRef<NodeJS.Timeout>()
-
   const customPromptRef = useRef<HTMLTextAreaElement>(null)
 
   // Clean up interval on unmount
@@ -86,15 +78,11 @@ export default function YoutubeSummarizer() {
     }
   }, [])
 
-  const API_URL = process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:8000' 
-    : ''
-
   // Load existing feature requests
   useEffect(() => {
     const loadFeatureRequests = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/feature-requests`)
+        const response = await fetch('/api/feature-request')
         const data = await response.json()
         if (data.requests) {
           setFeatureRequests(data.requests)
@@ -104,9 +92,9 @@ export default function YoutubeSummarizer() {
       }
     }
     loadFeatureRequests()
-  }, [API_URL])
+  }, [])
 
-  const handleSummarize = async (summaryType: string) => {
+  const handleSummarize = async (summaryType: 'short' | 'detailed' | 'custom') => {
     if (!youtubeUrl || !apiKey) {
       setError('Please provide both YouTube Video URL and API key')
       return
@@ -125,8 +113,7 @@ export default function YoutubeSummarizer() {
     }, 100)
 
     try {
-      console.log('Making request to:', `${API_URL}/api/summarize`)
-      const response = await fetch(`${API_URL}/api/summarize`, {
+      const response = await fetch('/api/summarize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +123,7 @@ export default function YoutubeSummarizer() {
           api_key: apiKey,
           output_language: outputLanguage,
           summary_type: summaryType,
-          custom_prompt: summaryType === 'custom' ? customPrompt : '',
+          custom_prompt: summaryType === 'custom' ? customPrompt : undefined,
         }),
       })
 
@@ -144,13 +131,13 @@ export default function YoutubeSummarizer() {
 
       if (response.ok && 'success' in data && data.success) {
         setSummary(data.summary)
-        setAdditionalInfo(data.additional_info)
+        setAdditionalInfo(data.additional_info || '')
       } else {
         setError('detail' in data ? data.detail : 'Failed to generate summary. Please check your API key and YouTube URL.')
       }
     } catch (error) {
       console.error('Summary generation error:', error)
-      setError('Network error or server is not responding. Please make sure the API server is running.')
+      setError('Network error or server is not responding.')
     } finally {
       setIsLoading(false)
       if (loadingInterval.current) {
@@ -159,7 +146,7 @@ export default function YoutubeSummarizer() {
     }
   }
 
-  const handleFullSummary = () => handleSummarize('full')
+  const handleFullSummary = () => handleSummarize('detailed')
   const handleShortSummary = () => handleSummarize('short')
   const handleSubmitPrompt = () => handleSummarize('custom')
 
@@ -183,7 +170,7 @@ export default function YoutubeSummarizer() {
   const handleFeatureRequest = async () => {
     if (featureRequest.trim()) {
       try {
-        const response = await fetch(`${API_URL}/api/feature-request`, {
+        const response = await fetch('/api/feature-request', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -196,13 +183,14 @@ export default function YoutubeSummarizer() {
 
         if (response.ok) {
           // Add the new request to the local state with current timestamp
-          const newRequest = {
+          const newRequest: FeatureRequest = {
             request_text: featureRequest.trim(),
             requester_name: requesterName.trim() || 'Anonymous',
             timestamp: new Date().toISOString()
           }
           setFeatureRequests(prev => [...prev, newRequest])
           setFeatureRequest('')
+          setRequesterName('')
         } else {
           console.error('Failed to save feature request')
         }
@@ -416,7 +404,7 @@ export default function YoutubeSummarizer() {
             <div className="mt-2">
               <Textarea 
                 id="feature-request" 
-                placeholder="Write your feature request or feedback here..." 
+                placeholder="Write your feature request or feedback here, this will be sent to Crimson's github repo" 
                 value={featureRequest}
                 onChange={(e) => setFeatureRequest(e.target.value)}
                 className="h-[200px] resize-none overflow-y-auto"

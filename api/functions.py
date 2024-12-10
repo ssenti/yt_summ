@@ -136,7 +136,7 @@ def summarize_text(text, api_key, model="grok-beta", max_tokens=300, language='e
     client = get_client(api_key)
 
     # Prepare the prompt with language specification
-    prompt = f"Please provide a concise summary in {language} for the following transcript without using any markdown formatting:\n\n{text}"
+    prompt = f"Please provide a concise summary in {language} for the following transcript:\n\n{text}"
 
     try:
         response = client.chat.completions.create(
@@ -352,8 +352,8 @@ def generate_concise_summary(event=None):
 
     # Prepare a concise summary prompt with strict sentence limit
     prompt = (
-        f"Please provide a very concise summary of the following transcript in {summary_language}, "
-        f"using a maximum of 4 sentences. Do not use any markdown formatting.\n\n{transcript}"
+        f"Please provide an extremely concise summary of the following transcript in {summary_language}, "
+        f"using a maximum of 4 bullet point sentences. number the sentences. \n\n{transcript}"
     )
 
     try:
@@ -485,7 +485,7 @@ def generate_custom_prompt(event=None):
     status_label.config(text="Generating custom summary...")
 
     # Prepare the custom prompt with language specification
-    prompt = f"Please {custom_prompt} in {summary_language} for the following transcript without using any markdown formatting:\n\n{transcript}"
+    prompt = f"Respond to this prompt "{custom_prompt}" in {summary_language} for the following transcript:\n\n{transcript}"
 
     try:
         response = openai.ChatCompletion.create(

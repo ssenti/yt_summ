@@ -51,15 +51,37 @@ def extract_video_id(url):
 def get_transcript(video_id):
     """Get transcript from YouTube video"""
     from youtube_transcript_api import YouTubeTranscriptApi
-    from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
+    from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound, NoTranscriptAvailable
     
     try:
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-        return " ".join([t['text'] for t in transcript_list]), None
+        # First try direct transcript retrieval for auto-generated transcripts
+        try:
+            transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=['ko'])
+            return " ".join([t['text'] for t in transcript_list]), None
+        except:
+            # If direct retrieval fails, try the list_transcripts approach
+            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            
+            # Get all available languages
+            available_languages = []
+            for transcript in transcript_list:
+                available_languages.append(transcript.language_code)
+            
+            if not available_languages:
+                return None, "No transcripts available for this video"
+            
+            # Try to get any available transcript
+            try:
+                transcript = transcript_list.find_transcript(available_languages)
+                transcript_parts = transcript.fetch()
+                return " ".join([t['text'] for t in transcript_parts]), None
+            except NoTranscriptAvailable:
+                return None, f"No transcript available. Available languages: {', '.join(available_languages)}"
+            
     except (TranscriptsDisabled, NoTranscriptFound) as e:
-        return None, str(e)
+        return None, f"Could not retrieve transcript: {str(e)}"
     except Exception as e:
-        return None, f"Unexpected error: {str(e)}"
+        return None, f"Unexpected error while retrieving transcript: {str(e)}"
 
 def detect_language(text):
     """Detect language of text"""
@@ -113,28 +135,79 @@ def process_summary(youtube_url, api_key, selected_model, output_language, summa
         if not transcript:
             return f"Failed to retrieve transcript: {error_or_language}", "No summary generated."
 
-        # Detect language
-        language = detect_language(transcript)
-        summary_language = "English" if output_language == "English" else language
+        # Language mapping for better prompting
+        language_names = {
+            'zh': 'Mandarin Chinese',
+            'hi': 'Hindi',
+            'es': 'Spanish',
+            'fr': 'French',
+            'ar': 'Standard Arabic',
+            'bn': 'Bengali',
+            'pt': 'Portuguese',
+            'ru': 'Russian',
+            'ur': 'Urdu',
+            'id': 'Indonesian',
+            'de': 'German',
+            'ja': 'Japanese',
+            'sw': 'Swahili',
+            'mr': 'Marathi',
+            'te': 'Telugu',
+            'tr': 'Turkish',
+            'ta': 'Tamil',
+            'vi': 'Vietnamese',
+            'ko': 'Korean',
+            'it': 'Italian',
+            'pa': 'Punjabi',
+            'gu': 'Gujarati',
+            'fa': 'Persian',
+            'th': 'Thai',
+            'pl': 'Polish',
+            'uk': 'Ukrainian',
+            'ms': 'Malay',
+            'kn': 'Kannada',
+            'ha': 'Hausa'
+        }
+
+        # Get the full language name
+        target_language = language_names.get(output_language, output_language)
+        if output_language == 'english':
+            target_language = 'English'
+        elif output_language == 'korean':
+            target_language = 'Korean'
+
+        # Prepare system message
+        system_message = (
+            f"You are an assistant that summarizes text. "
+            f"Always provide your response in {target_language}. "
+            f"Make sure the summary sounds natural and fluent in {target_language}."
+        )
 
         # Prepare prompt based on summary type
         if summary_type == "short":
             prompt = (
-                f"Please provide a very concise summary of the following transcript in {summary_language}, "
-                f"using a maximum of 4 sentences in bullet points.\n\n{transcript}"
+                f"Please provide a very concise summary of the following transcript, "
+                f"using a maximum of 4 sentences in bullet points. "
+                f"Provide the summary in {target_language}:\n\n{transcript}"
             )
         elif summary_type == "custom":
             if not custom_prompt:
                 return "Please provide a custom prompt.", "No summary generated."
-            prompt = f"Please {custom_prompt} in {summary_language} for the following transcript without using any markdown formatting:\n\n{transcript}"
+            prompt = (
+                f"{custom_prompt}\n\n"
+                f"Provide the response in {target_language}.\n\n"
+                f"Transcript:\n{transcript}"
+            )
         else:  # full summary
-            prompt = f"Please provide a comprehensive summary in {summary_language} for the following transcript without using any markdown formatting:\n\n{transcript}"
+            prompt = (
+                f"Please provide a comprehensive summary of the following transcript. "
+                f"Provide the summary in {target_language}:\n\n{transcript}"
+            )
 
         try:
             response = client.chat.completions.create(
                 model="grok-beta",
                 messages=[
-                    {"role": "system", "content": "You are an assistant that summarizes text."},
+                    {"role": "system", "content": system_message},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=1000,
@@ -149,7 +222,7 @@ def process_summary(youtube_url, api_key, selected_model, output_language, summa
             completion_tokens = usage.completion_tokens
             total_tokens = usage.total_tokens
 
-            # Prepare additional info
+            # Prepare additional info in English (keeping it simple)
             additional_info = (
                 f"Model: grok-beta\n"
                 f"Tokens Used:\n"

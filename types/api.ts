@@ -6,10 +6,18 @@ export interface SummaryRequest {
   custom_prompt?: string;
 }
 
+export interface TokenInfo {
+  total: number;
+  prompt: number;
+  completion: number;
+}
+
 export interface SummaryResponse {
   success: boolean;
   summary: string;
   additional_info?: string;
+  model: string;
+  tokens: TokenInfo;
 }
 
 export interface ErrorResponse {

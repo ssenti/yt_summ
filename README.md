@@ -3,18 +3,18 @@
 Just a lil' [website](https://ytsumm.vercel.app/) to get a quick summary of a YouTube video using AI
 
 
-## Context
-
-- I watch like at least 10-20 informational videos everyday, wanted to save some time
-- There are literally hundreds of services like this out there, though they're usually either slow, inaccurate, full of ads or needa pay
-- And so I initially just built this for my own use, thought it might be useful for others as well :)
-
-
 ## Features
 
 - Full Summary, Short Summary and Custom Prompt with keyboard shortcuts
 - Basically free right now, because xAI's giving out free API credits
 - Multi-language support
+
+  
+## Context
+
+- I watch like at least 10-20 informational videos everyday, wanted to save some time
+- There are literally hundreds of services like this out there, though they're usually either slow, inaccurate, full of ads or needa pay
+- And so I initially just built this for my own use, thought it might be useful for others as well :)
 
 
 ## Basic Tech Stack

@@ -49,3 +49,4 @@ htmlcov/
 .DS_Store
 .vercel
 youtube_summarizer.log
+feature_requests.json

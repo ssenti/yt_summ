@@ -221,14 +221,15 @@ def process_summary(youtube_url, api_key, selected_model, output_language, summa
             prompt_tokens = usage.prompt_tokens
             completion_tokens = usage.completion_tokens
             total_tokens = usage.total_tokens
+            model_name = response.model  # Get the actual model name from response
 
-            # Prepare additional info in English (keeping it simple)
+            # Prepare additional info with proper hierarchical structure
             additional_info = (
-                f"Model: grok-beta\n"
-                f"Tokens Used:\n"
-                f"  - Prompt Tokens: {prompt_tokens}\n"
-                f"  - Completion Tokens: {completion_tokens}\n"
-                f"  - Total Tokens: {total_tokens}\n"
+                f"Model Used: {model_name}\n\n"  # Add extra newline after model
+                f"Tokens Used:\n\n"
+                f"  • Prompt Tokens: {prompt_tokens}\n\n"
+                f"  • Completion Tokens: {completion_tokens}\n\n"
+                f"  • Total Tokens: {total_tokens}"
             )
 
             return summary, additional_info

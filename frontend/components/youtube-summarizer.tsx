@@ -187,7 +187,7 @@ export default function YoutubeSummarizer() {
       
       <div className="space-y-4">
         <div>
-          <Label htmlFor="youtube-url">Youtube Video URL</Label>
+          <Label htmlFor="youtube-url">Youtube URL</Label>
           <div className="flex gap-2">
             <Input 
               id="youtube-url" 
@@ -197,20 +197,21 @@ export default function YoutubeSummarizer() {
             />
             <Button 
               onClick={handlePasteYoutubeUrl}
-              className="whitespace-nowrap bg-black hover:bg-black/90 text-white"
+              className="bg-black hover:bg-black/90 text-white text-sm font-medium"
             >
-              Paste Youtube Link (⌘⇧V)
+              Paste Youtube URL (⌘⇧V)
             </Button>
           </div>
         </div>
         
         <div>
-          <Label htmlFor="api-key">API Key</Label>
+          <Label htmlFor="api-key">xAI API Key</Label>
           <Input 
             id="api-key" 
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
+            placeholder="Ask Crimson if confused..."
           />
         </div>
         
@@ -233,7 +234,7 @@ export default function YoutubeSummarizer() {
             </RadioGroup>
             
             <Select
-              value={outputLanguage as string}
+              value={LANGUAGES.some(lang => lang.code === outputLanguage) ? outputLanguage as string : undefined}
               onValueChange={(value: LanguageCode) => setOutputLanguage(value)}
             >
               <SelectTrigger className="w-[200px]">
@@ -250,28 +251,37 @@ export default function YoutubeSummarizer() {
           </div>
         </div>
         
-        <div className="space-x-4">
+        <div className="grid grid-cols-4 gap-2">
           <Button 
             onClick={handleFullSummary} 
             disabled={isLoading}
-            className="bg-black hover:bg-black/90 text-white"
+            className="bg-black hover:bg-black/90 text-white text-sm font-medium"
           >
             {isLoading ? 'Generating...' : 'Full Summary (⌘F)'}
           </Button>
           <Button 
             onClick={handleShortSummary}
             disabled={isLoading}
-            className="bg-black hover:bg-black/90 text-white"
+            className="bg-black hover:bg-black/90 text-white text-sm font-medium"
           >
             {isLoading ? 'Generating...' : 'Short Summary (⌘S)'}
           </Button>
           <Button 
             onClick={handleCustomPrompt}
             disabled={isLoading}
-            className="bg-black hover:bg-black/90 text-white"
+            className="bg-black hover:bg-black/90 text-white text-sm font-medium"
           >
             Custom Prompt (⌘P)
           </Button>
+          {showCustomPrompt && (
+            <Button 
+              onClick={handleSubmitPrompt}
+              disabled={isLoading}
+              className="bg-black hover:bg-black/90 text-white text-sm font-medium"
+            >
+              {isLoading ? 'Generating...' : 'Submit Prompt (⌘Ent)'}
+            </Button>
+          )}
         </div>
         
         {showCustomPrompt && (
@@ -284,13 +294,6 @@ export default function YoutubeSummarizer() {
               onChange={(e) => setCustomPrompt(e.target.value)}
               ref={customPromptRef}
             />
-            <Button 
-              onClick={handleSubmitPrompt}
-              disabled={isLoading}
-              className="bg-black hover:bg-black/90 text-white"
-            >
-              {isLoading ? 'Generating...' : 'Submit Prompt (⌘Enter)'}
-            </Button>
           </div>
         )}
         
@@ -304,7 +307,7 @@ export default function YoutubeSummarizer() {
           <Label htmlFor="summary">Summary {isLoading && `(Loading... ${loadingTime}s)`}</Label>
           <div className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
             {summary ? (
-              <ReactMarkdown className="prose max-w-none dark:prose-invert w-full text-sm">
+              <ReactMarkdown className="prose prose-sm dark:prose-invert w-full prose-headings:font-bold prose-strong:text-black dark:prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal">
                 {summary}
               </ReactMarkdown>
             ) : (
@@ -317,13 +320,17 @@ export default function YoutubeSummarizer() {
         
         <div>
           <Label htmlFor="additional-info">Additional Information</Label>
-          <Textarea 
-            id="additional-info" 
-            placeholder="Additional information will appear here..." 
-            value={additionalInfo}
-            readOnly 
-            className="font-sans text-sm"
-          />
+          <div className="min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+            {additionalInfo ? (
+              <ReactMarkdown className="prose prose-sm dark:prose-invert w-full prose-headings:font-bold prose-strong:text-black dark:prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal">
+                {additionalInfo}
+              </ReactMarkdown>
+            ) : (
+              <p className="text-muted-foreground">
+                Additional information will appear here...
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

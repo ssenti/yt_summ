@@ -82,6 +82,8 @@ export default function YoutubeSummarizer() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [loadingTime, setLoadingTime] = useState(0)
+  const [featureRequest, setFeatureRequest] = useState('')
+  const [featureRequests, setFeatureRequests] = useState<string[]>([])
   const loadingInterval = useRef<NodeJS.Timeout>()
 
   const customPromptRef = useRef<HTMLTextAreaElement>(null)
@@ -101,7 +103,7 @@ export default function YoutubeSummarizer() {
 
   const handleSummarize = async (summaryType: string) => {
     if (!youtubeUrl || !apiKey) {
-      setError('Please provide both YouTube URL and API key')
+      setError('Please provide both YouTube Video URL and API key')
       return
     }
 
@@ -171,6 +173,13 @@ export default function YoutubeSummarizer() {
     }
   }
 
+  const handleFeatureRequest = () => {
+    if (featureRequest.trim()) {
+      setFeatureRequests(prev => [...prev, featureRequest.trim()])
+      setFeatureRequest('')
+    }
+  }
+
   useKeyboardShortcut('f', handleFullSummary)
   useKeyboardShortcut('s', handleShortSummary)
   useKeyboardShortcut('p', handleCustomPrompt)
@@ -183,11 +192,14 @@ export default function YoutubeSummarizer() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-3xl font-bold text-center mb-8">Youtube Video Summarizer</h1>
+      <h1 className="text-5xl font-black text-center mb-8 tracking-tight drop-shadow-sm">
+        <span className="bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">YouTube</span>
+        <span className="bg-gradient-to-r from-gray-900 via-black to-gray-900 bg-clip-text text-transparent"> Summarizer</span>
+      </h1>
       
       <div className="space-y-4">
         <div>
-          <Label htmlFor="youtube-url">Youtube URL</Label>
+          <Label htmlFor="youtube-url" className="font-bold">YouTube Video URL</Label>
           <div className="flex gap-2">
             <Input 
               id="youtube-url" 
@@ -199,24 +211,24 @@ export default function YoutubeSummarizer() {
               onClick={handlePasteYoutubeUrl}
               className="bg-black hover:bg-black/90 text-white text-sm font-medium"
             >
-              Paste Youtube URL (⌘⇧V)
+              Paste URL (⌘⇧V)
             </Button>
           </div>
         </div>
         
         <div>
-          <Label htmlFor="api-key">xAI API Key</Label>
+          <Label htmlFor="api-key" className="font-bold">xAI API Key</Label>
           <Input 
             id="api-key" 
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Ask Crimson if confused..."
+            placeholder="xAI is currently giving out free credits..."
           />
         </div>
         
         <div>
-          <Label>Output Language</Label>
+          <Label className="font-bold">Output Language</Label>
           <div className="flex items-center gap-4">
             <RadioGroup 
               value={outputLanguage}
@@ -286,7 +298,7 @@ export default function YoutubeSummarizer() {
         
         {showCustomPrompt && (
           <div className="space-y-2">
-            <Label htmlFor="custom-prompt">Custom Prompt (Optional)</Label>
+            <Label htmlFor="custom-prompt" className="font-bold">Custom Prompt (Optional)</Label>
             <Textarea 
               id="custom-prompt" 
               placeholder="Enter your custom prompt here..."
@@ -304,7 +316,7 @@ export default function YoutubeSummarizer() {
         )}
         
         <div>
-          <Label htmlFor="summary">Summary {isLoading && `(Loading... ${loadingTime}s)`}</Label>
+          <Label htmlFor="summary" className="font-bold">Summary {isLoading && `(Loading... ${loadingTime}s)`}</Label>
           <div className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
             {summary ? (
               <ReactMarkdown className="prose prose-sm dark:prose-invert w-full prose-headings:font-bold prose-strong:text-black dark:prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal">
@@ -319,7 +331,7 @@ export default function YoutubeSummarizer() {
         </div>
         
         <div>
-          <Label htmlFor="additional-info">Additional Information</Label>
+          <Label htmlFor="additional-info" className="font-bold">Additional Information</Label>
           <div className="min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
             {additionalInfo ? (
               <ReactMarkdown className="prose prose-sm dark:prose-invert w-full prose-headings:font-bold prose-strong:text-black dark:prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal">
@@ -330,6 +342,48 @@ export default function YoutubeSummarizer() {
                 Additional information will appear here...
               </p>
             )}
+          </div>
+        </div>
+
+        {/* Feature Request Section */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Feature Request Input */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="feature-request" className="font-bold">Feature Request</Label>
+              <Button 
+                onClick={handleFeatureRequest}
+                disabled={!featureRequest.trim()}
+                className="bg-black hover:bg-black/90 text-white text-xs font-medium h-6 px-2 py-0"
+              >
+                Send Request
+              </Button>
+            </div>
+            <Textarea 
+              id="feature-request" 
+              placeholder="Write your feature request or feedback here..." 
+              value={featureRequest}
+              onChange={(e) => setFeatureRequest(e.target.value)}
+              className="min-h-[200px] resize-none"
+            />
+          </div>
+
+          {/* Feature Request List */}
+          <div className="space-y-2">
+            <Label className="font-bold">Feature Request List</Label>
+            <div className="min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background overflow-auto">
+              {featureRequests.length > 0 ? (
+                <ul className="list-disc pl-5 space-y-2">
+                  {featureRequests.map((request, index) => (
+                    <li key={index} className="text-sm">{request}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground">
+                  Feature requests will appear here...
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

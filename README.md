@@ -1,8 +1,24 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YouTube Video Summarizer
+
+A web application that summarizes YouTube videos using AI technology. Built with Next.js and modern web technologies.
+
+## Features
+
+- Paste YouTube video URLs to get instant summaries
+- Clean, modern UI built with Shadcn/UI components
+- Responsive design that works on desktop and mobile
+- Server-side API handling for video processing
+
+## Tech Stack
+
+- [Next.js 14](https://nextjs.org/) - React framework
+- [Shadcn/UI](https://ui.shadcn.com/) - UI component library
+- TypeScript - For type-safe code
+- Server-side API routes
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
 
 ```bash
 npm run dev

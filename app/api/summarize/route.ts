@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 import { YoutubeTranscript } from 'youtube-transcript';
-import type { SummaryRequest, SummaryResponse, ErrorResponse } from '../../../types/api';
+import type { SummaryRequest, SummaryResponse, ErrorResponse } from '@/app/types/api';
 
 export const runtime = 'edge';
 

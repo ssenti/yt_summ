@@ -1,15 +1,16 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useRouter } from 'next/navigation'
+import { Button } from "@/app/components/ui/button"
+import { Input } from "@/app/components/ui/input"
+import { Label } from "@/app/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/app/components/ui/radio-group"
+import { Textarea } from "@/app/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
 import ReactMarkdown from 'react-markdown'
-import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
-import type { SummaryResponse, ErrorResponse } from '@/types/api'
+import { useKeyboardShortcut } from '@/app/hooks/useKeyboardShortcut'
+import type { SummaryResponse, ErrorResponse } from '@/app/types/api'
 
 // Common languages list
 const LANGUAGES = [
@@ -211,7 +212,7 @@ export default function YoutubeSummarizer() {
         <span className="bg-gradient-to-r from-red-600 via-red-500 to-red-400 bg-clip-text text-transparent">
           YouTube{" "}
         </span>
-        <span className="bg-gradient-to-r from-gray-900 via-black to-gray-800 bg-clip-text text-transparent">
+        <span className="bg-gradient-to-r from-gray-900 via-black-900 to-gray-900 bg-clip-text text-transparent">
           Summarizer
         </span>
       </h1>

@@ -52,6 +52,9 @@ interface FeatureRequest {
   timestamp: string;
 }
 
+// Add this near the feature request section
+const GITHUB_REPO_URL = 'https://github.com/ssenti/yt_summ_gradio/issues?q=is%3Aissue+label%3Afeature-request';
+
 export default function YoutubeSummarizer() {
   const [youtubeUrl, setYoutubeUrl] = useState('')
   const [apiKey, setApiKey] = useState('')
@@ -59,7 +62,7 @@ export default function YoutubeSummarizer() {
   const [showCustomPrompt, setShowCustomPrompt] = useState(false)
   const [customPrompt, setCustomPrompt] = useState('')
   const [summary, setSummary] = useState('')
-  const [additionalInfo, setAdditionalInfo] = useState('')
+  const [response, setResponse] = useState<SummaryResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [loadingTime, setLoadingTime] = useState(0)
@@ -103,7 +106,7 @@ export default function YoutubeSummarizer() {
     setIsLoading(true)
     setError('')
     setSummary('')
-    setAdditionalInfo('')
+    setResponse(null)
     setLoadingTime(0)
 
     // Start the loading timer
@@ -127,13 +130,13 @@ export default function YoutubeSummarizer() {
         }),
       })
 
-      const data = await response.json() as SummaryResponse | ErrorResponse
+      const data = await response.json() as SummaryResponse;
 
-      if (response.ok && 'success' in data && data.success) {
+      if (response.ok && data.success) {
         setSummary(data.summary)
-        setAdditionalInfo(data.additional_info || '')
+        setResponse(data)
       } else {
-        setError('detail' in data ? data.detail : 'Failed to generate summary. Please check your API key and YouTube URL.')
+        setError('Failed to generate summary. Please check your API key and YouTube URL.')
       }
     } catch (error) {
       console.error('Summary generation error:', error)
@@ -364,15 +367,22 @@ export default function YoutubeSummarizer() {
         <div>
           <Label htmlFor="additional-info" className="font-bold">Processing Info</Label>
           <div className="h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto">
-            {additionalInfo ? (
-              <div className="w-full">
-                <ReactMarkdown className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-bold prose-strong:text-black dark:prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal">
-                  {additionalInfo}
-                </ReactMarkdown>
+            {summary ? (
+              <div className="space-y-1">
+                <p><span className="font-semibold">Model:</span> {response?.model || 'grok-beta'}</p>
+                <p><span className="font-semibold">Total Tokens:</span> {response?.tokens?.total || 0}</p>
+                <ul className="list-none pl-4 space-y-0.5">
+                  <li>
+                    <span className="font-medium">- Prompt Tokens:</span> {response?.tokens?.prompt || 0}
+                  </li>
+                  <li>
+                    <span className="font-medium">- Completion Tokens:</span> {response?.tokens?.completion || 0}
+                  </li>
+                </ul>
               </div>
             ) : (
               <p className="text-muted-foreground">
-                Additional information will appear here...
+                Processing information will appear here...
               </p>
             )}
           </div>
@@ -404,7 +414,7 @@ export default function YoutubeSummarizer() {
             <div className="mt-2">
               <Textarea 
                 id="feature-request" 
-                placeholder="Write your feature request or feedback here, this will be sent to Crimson's github repo" 
+                placeholder="Feel free to request some additional features you would like to see on this website, it will be sent to Crimson's github repository as an issue. He'll look into it when he has some free time :)" 
                 value={featureRequest}
                 onChange={(e) => setFeatureRequest(e.target.value)}
                 className="h-[200px] resize-none overflow-y-auto"
@@ -416,28 +426,48 @@ export default function YoutubeSummarizer() {
           <div>
             <div className="flex justify-between items-center gap-2">
               <Label className="font-bold">Feature Request List</Label>
-              <div className="invisible w-28 h-7"></div>
+              <a 
+                href={GITHUB_REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+              >
+                View all on GitHub
+              </a>
             </div>
             <div className="mt-2">
               <div className="h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background overflow-y-auto">
                 {featureRequests.length > 0 ? (
                   <ul className="list-disc pl-5 space-y-2">
-                    {[...featureRequests].reverse().map((request, index) => (
-                      <li key={index} className="text-sm">
-                        <span>{request.request_text}</span>
-                        <div className="text-xs text-gray-500 mt-1">
-                          <span>By: {request.requester_name}</span>
-                          <span className="ml-2">
-                            {new Date(request.timestamp).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
+                    {[...featureRequests]
+                      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                      .map((request, index) => (
+                        <li key={index} className="text-sm">
+                          <span>{request.request_text}</span>
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span>By: {request.requester_name}</span>
+                            <span className="ml-2">
+                              {new Date(request.timestamp).toLocaleString()}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
                   </ul>
                 ) : (
-                  <p className="text-muted-foreground">
-                    Feature requests will appear here...
-                  </p>
+                  <div className="text-muted-foreground space-y-2">
+                    <p>Feature requests will appear here...</p>
+                    <p className="text-xs">
+                      You can also view all feature requests on{' '}
+                      <a 
+                        href={GITHUB_REPO_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        GitHub Issues
+                      </a>
+                    </p>
+                  </div>
                 )}
               </div>
             </div>

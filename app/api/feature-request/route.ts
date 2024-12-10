@@ -6,6 +6,18 @@ interface FeatureRequest {
   timestamp: string;
 }
 
+interface GitHubIssue {
+  number: number;
+  title: string;
+  body: string;
+  created_at: string;
+  html_url: string;
+  labels: Array<{
+    name: string;
+    color: string;
+  }>;
+}
+
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPO = process.env.GITHUB_REPO || 'yt_summ_gradio';
 const GITHUB_OWNER = process.env.GITHUB_OWNER;
@@ -58,7 +70,7 @@ async function createGitHubIssue(title: string, body: string) {
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as GitHubIssue;
     console.log('GitHub issue created:', {
       issueNumber: data.number,
       url: data.html_url
@@ -70,7 +82,7 @@ async function createGitHubIssue(title: string, body: string) {
   }
 }
 
-async function getGitHubIssues() {
+async function getGitHubIssues(): Promise<FeatureRequest[]> {
   if (!GITHUB_TOKEN || !GITHUB_OWNER) {
     throw new Error('GitHub configuration is missing');
   }
@@ -96,9 +108,9 @@ async function getGitHubIssues() {
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
 
-    const issues = await response.json();
+    const issues = (await response.json()) as GitHubIssue[];
     console.log('Fetched issues count:', issues.length);
-    return issues.map((issue: any) => ({
+    return issues.map((issue) => ({
       request_text: issue.body,
       requester_name: issue.title.split(' by ')[1] || 'Anonymous',
       timestamp: issue.created_at

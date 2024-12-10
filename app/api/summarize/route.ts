@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 import { YoutubeTranscript } from 'youtube-transcript';
-import type { SummaryRequest, SummaryResponse, ErrorResponse } from '@/types/api';
+import type { SummaryRequest, SummaryResponse, ErrorResponse } from '../../../types/api';
 
 export const runtime = 'edge';
 
@@ -109,7 +109,12 @@ export async function POST(request: NextRequest) {
     const result: SummaryResponse = {
       success: true,
       summary: content.trim(),
-      additional_info: `Model: grok-beta, Tokens used: ${response.usage?.total_tokens || 0}`
+      model: 'grok-beta',
+      tokens: {
+        total: response.usage?.total_tokens || 0,
+        prompt: response.usage?.prompt_tokens || 0,
+        completion: response.usage?.completion_tokens || 0
+      }
     };
 
     return new Response(

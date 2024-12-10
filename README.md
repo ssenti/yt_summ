@@ -1,6 +1,6 @@
-# YouTube Video Summarizer
+# YouTube Summarizer
 
-A web application that summarizes YouTube videos using AI technology. Built with Next.js and modern web technologies.
+Get a quick summary of youtube videos using AI
 
 ## Features
 

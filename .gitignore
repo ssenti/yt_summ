@@ -48,3 +48,4 @@ htmlcov/
 .gradio/
 .DS_Store
 .vercel
+youtube_summarizer.log

@@ -5,6 +5,9 @@ import logging
 import sys
 from openai import OpenAI
 from typing import Optional
+import json
+from datetime import datetime
+import os
 
 # Configure logging
 logging.basicConfig(
@@ -20,7 +23,12 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://yt-summ-gradio.vercel.app",
+        "https://yt-summ-gradio-git-main.vercel.app",
+        "https://yt-summ-gradio-*.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,6 +40,11 @@ class SummaryRequest(BaseModel):
     output_language: str = "English"
     summary_type: str
     custom_prompt: Optional[str] = ""
+
+class FeatureRequest(BaseModel):
+    request_text: str
+    requester_name: str
+    timestamp: Optional[str] = None
 
 def extract_video_id(url):
     """Extract video ID from YouTube URL"""
@@ -242,6 +255,36 @@ def process_summary(youtube_url, api_key, selected_model, output_language, summa
         logging.error(f"Error in process_summary: {e}")
         return f"Error: {str(e)}", "Error occurred"
 
+# Create data directory if it doesn't exist
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+
+def save_feature_request(request: FeatureRequest):
+    """Save feature request to a JSON file"""
+    file_path = os.path.join(DATA_DIR, "feature_requests.json")
+    
+    # Create empty list if file doesn't exist
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as f:
+            json.dump([], f)
+    
+    # Read existing requests
+    with open(file_path, 'r') as f:
+        requests = json.load(f)
+    
+    # Add new request with timestamp
+    request_dict = {
+        "request_text": request.request_text,
+        "requester_name": request.requester_name,
+        "timestamp": datetime.now().isoformat()
+    }
+    requests.append(request_dict)
+    
+    # Save updated requests
+    with open(file_path, 'w') as f:
+        json.dump(requests, f, indent=2)
+
 @app.post("/api/summarize")
 async def summarize(request: SummaryRequest):
     try:
@@ -259,6 +302,29 @@ async def summarize(request: SummaryRequest):
             "additional_info": additional_info
         }
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/feature-request")
+async def add_feature_request(request: FeatureRequest):
+    try:
+        save_feature_request(request)
+        return {"success": True, "message": "Feature request saved successfully"}
+    except Exception as e:
+        logging.error(f"Error saving feature request: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/feature-requests")
+async def get_feature_requests():
+    try:
+        file_path = os.path.join(DATA_DIR, "feature_requests.json")
+        if not os.path.exists(file_path):
+            return {"requests": []}
+        
+        with open(file_path, 'r') as f:
+            requests = json.load(f)
+        return {"requests": requests}
+    except Exception as e:
+        logging.error(f"Error reading feature requests: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/health")

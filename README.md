@@ -5,9 +5,10 @@ Just a lil' [website](https://dub.sh/ytsumm) to get a quick summary of a YouTube
 
 ## Features
 
-- Full Summary, Short Summary and Custom Prompt with keyboard shortcuts
-- Basically free right now, because xAI's giving out free API credits
-- Multi-language support
+- Simple: Full Summary, Short Summary and Custom Prompt with keyboard shortcuts
+- Free: Basically free right now, because xAI's giving out free API credits
+- Global: Multi-language support
+- Privacy: I do not have access to what kind of vids y'all watch btw LOLL
 
   
 ## Context

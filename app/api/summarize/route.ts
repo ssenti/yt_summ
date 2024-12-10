@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 import { YoutubeTranscript } from 'youtube-transcript';
-import type { SummaryRequest, SummaryResponse, ErrorResponse } from '../../../types/api';
+import type { SummaryRequest, SummaryResponse, ErrorResponse } from '@/app/types/api';
 
 export const runtime = 'edge';
 
@@ -38,16 +38,16 @@ async function getTranscript(videoId: string): Promise<[string | null, string | 
 }
 
 function createSystemMessage(targetLanguage: string): string {
-  return `You are an assistant that summarizes text. Always provide your response in ${targetLanguage}. Make sure the summary sounds natural and fluent in ${targetLanguage}.`;
+  return `You are a helpful assistant that provides a concise, accurate and relevant response to a user prompt, based on a video transcript they provide. Make sure your response sounds natural and fluent in ${targetLanguage}.`;
 }
 
 function createPrompt(transcript: string, summaryType: string, targetLanguage: string, customPrompt?: string): string {
   if (summaryType === 'short') {
-    return `Please provide a very concise summary of the following transcript, using a maximum of 4 sentences in bullet points. Provide the summary in ${targetLanguage}:\n\n${transcript}`;
+    return `Please provide a very concise summary of the following transcript in ${targetLanguage}. Format your response as plain bullet points (without bold formatting), using a maximum of 4 sentences:\n\n${transcript}`;
   } else if (summaryType === 'custom' && customPrompt) {
-    return `${customPrompt}\n\nProvide the response in ${targetLanguage}.\n\nTranscript:\n${transcript}`;
+    return `Please provide your response in ${targetLanguage}. User prompt:\n\n${customPrompt}\n\n\n\nTranscript:\n\n${transcript}`;
   } else {
-    return `Please provide a comprehensive summary of the following transcript. Provide the summary in ${targetLanguage}:\n\n${transcript}`;
+    return `Please provide a concise summary of the following transcript. Provide the summary in ${targetLanguage}:\n\n${transcript}`;
   }
 }
 
@@ -97,8 +97,8 @@ export async function POST(request: NextRequest) {
         { role: 'system', content: createSystemMessage(output_language) },
         { role: 'user', content: createPrompt(transcript, summary_type, output_language, custom_prompt) }
       ],
-      max_tokens: 300,
-      temperature: 0.5,
+      max_tokens: 2048,
+      temperature: 0.7,
     });
 
     const content = response.choices[0]?.message?.content;

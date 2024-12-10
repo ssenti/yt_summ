@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YouTube Summarizer
 
-## Getting Started
+Just a lil' [website](https://dub.sh/ytsumm) to get a quick summary of a YouTube video using AI
 
-First, run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Full Summary, Short Summary and Custom Prompt with keyboard shortcuts
+- Basically free right now, because xAI's giving out free API credits
+- Multi-language support
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+  
+## Context
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- I watch like at least 10-20 informational videos everyday, wanted to save some time
+- There are literally hundreds of services like this out there, though they're usually either slow, inaccurate, full of ads or needa pay
+- And so I initially just built this for my own use, thought it might be useful for others as well :)
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+## Basic Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Next.js 14 - React framework
+- Shadcn - UI component library
+- TypeScript - Type-safe code
+- Tailwind - CSS framework
+- Edge Functions - Server-side API routes
+- Youtube Transcript API
+- LLM: xAI (grok-beta)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Further Stuff
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Ummm don't think I'll have much time to do anything further tbh, but do let me know!
+- You can submit feature requests directly at the bottom of the website
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+

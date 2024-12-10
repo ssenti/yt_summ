@@ -1,7 +1,7 @@
 # YouTube Summarizer
 
-Just a lil' website to get a quick summary of a YouTube video using AI
-Visit: (https://ytsumm.vercel.app/)
+Just a lil' [website](https://ytsumm.vercel.app/) to get a quick summary of a YouTube video using AI
+
 
 ## Context
 

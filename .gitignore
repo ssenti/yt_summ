@@ -50,3 +50,4 @@ htmlcov/
 .vercel
 youtube_summarizer.log
 feature_requests.json
+.api/data/feature_requests.json

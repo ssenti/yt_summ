@@ -45,7 +45,6 @@ htmlcov/
 .coverage.*
 
 .github/workflows/main.yml
-.gradio/
 .DS_Store
 .vercel
 youtube_summarizer.log

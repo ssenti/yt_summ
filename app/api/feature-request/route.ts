@@ -19,7 +19,7 @@ interface GitHubIssue {
 }
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const GITHUB_REPO = process.env.GITHUB_REPO || 'yt_summ_gradio';
+const GITHUB_REPO = process.env.GITHUB_REPO || 'yt_summ';
 const GITHUB_OWNER = process.env.GITHUB_OWNER;
 
 // Cache for feature requests (still useful for quick reads)

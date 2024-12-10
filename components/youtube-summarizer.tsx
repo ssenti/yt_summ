@@ -53,7 +53,7 @@ interface FeatureRequest {
 }
 
 // Add this near the feature request section
-const GITHUB_REPO_URL = 'https://github.com/ssenti/yt_summ_gradio/issues?q=is%3Aissue+label%3Afeature-request';
+const GITHUB_REPO_URL = 'https://github.com/ssenti/yt_summ/issues?q=is%3Aissue+label%3Afeature-request';
 
 export default function YoutubeSummarizer() {
   const [youtubeUrl, setYoutubeUrl] = useState('')

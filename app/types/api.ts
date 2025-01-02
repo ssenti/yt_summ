@@ -4,6 +4,7 @@ export interface SummaryRequest {
   output_language: string;
   summary_type: 'short' | 'detailed' | 'custom';
   custom_prompt?: string;
+  llm_provider: 'deepseek' | 'gemini' | 'xai' | 'openai';
 }
 
 export interface TokenInfo {

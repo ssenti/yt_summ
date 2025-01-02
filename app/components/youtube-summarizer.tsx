@@ -71,6 +71,7 @@ export default function YoutubeSummarizer() {
   const [featureRequests, setFeatureRequests] = useState<FeatureRequest[]>([])
   const loadingInterval = useRef<NodeJS.Timeout>()
   const customPromptRef = useRef<HTMLTextAreaElement>(null)
+  const [selectedLLM, setSelectedLLM] = useState('deepseek')
 
   // Clean up interval on unmount
   useEffect(() => {
@@ -127,6 +128,7 @@ export default function YoutubeSummarizer() {
           output_language: outputLanguage,
           summary_type: summaryType,
           custom_prompt: summaryType === 'custom' ? customPrompt : undefined,
+          llm_provider: selectedLLM,
         }),
       })
 
@@ -238,14 +240,31 @@ export default function YoutubeSummarizer() {
         </div>
         
         <div>
-          <Label htmlFor="api-key" className="font-bold">xAI API Key</Label>
-          <Input 
-            id="api-key" 
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="xAI is currently giving out free credits..."
-          />
+          <Label htmlFor="api-key" className="font-bold">API Key</Label>
+          <div className="flex gap-2">
+            <Input 
+              id="api-key" 
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder={`Enter your ${selectedLLM.toUpperCase()} API key...`}
+              className="flex-1"
+            />
+            <Select
+              value={selectedLLM}
+              onValueChange={setSelectedLLM}
+            >
+              <SelectTrigger className="w-[23%]">
+                <SelectValue placeholder="Model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="deepseek">Deepseek</SelectItem>
+                <SelectItem value="gemini">Gemini</SelectItem>
+                <SelectItem value="xai">xAI</SelectItem>
+                <SelectItem value="openai">OpenAI</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         
         <div>

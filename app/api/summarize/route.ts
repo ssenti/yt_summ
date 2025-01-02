@@ -38,7 +38,7 @@ async function getTranscript(videoId: string): Promise<[string | null, string | 
 }
 
 function createSystemMessage(targetLanguage: string): string {
-  return `You are a helpful assistant that provides a concise, accurate and relevant response to a user prompt, based on a video transcript they provide. Make sure your response sounds natural and fluent in ${targetLanguage}.`;
+  return `You are a helpful assistant that provides an accurate and relevant response to a user prompt, based on a video transcript they provide. Make sure your response sounds natural and fluent in ${targetLanguage}.`;
 }
 
 function createPrompt(transcript: string, summaryType: string, targetLanguage: string, customPrompt?: string): string {
@@ -47,14 +47,38 @@ function createPrompt(transcript: string, summaryType: string, targetLanguage: s
   } else if (summaryType === 'custom' && customPrompt) {
     return `Please provide your response in ${targetLanguage}. User prompt:\n\n${customPrompt}\n\n\n\nTranscript:\n\n${transcript}`;
   } else {
-    return `Please provide a concise summary of the following transcript. Provide the summary in ${targetLanguage}:\n\n${transcript}`;
+    return `Please provide a detailed full summary of the following transcript. Provide the summary in ${targetLanguage}:\n\n${transcript}`;
   }
 }
+
+interface LLMConfig {
+  model: string;
+  baseURL: string;
+}
+
+const LLM_CONFIGS: Record<string, LLMConfig> = {
+  deepseek: {
+    model: 'deepseek-chat',
+    baseURL: 'https://api.deepseek.com'
+  },
+  gemini: {
+    model: 'gemini-2.0-flash-exp',
+    baseURL: 'https://generativelanguage.googleapis.com/v1beta/'
+  },
+  xai: {
+    model: 'grok-2-1212',
+    baseURL: 'https://api.x.ai/v1'
+  },
+  openai: {
+    model: 'gpt-4o',
+    baseURL: 'https://api.openai.com/v1'
+  }
+};
 
 export async function POST(request: NextRequest) {
   try {
     const data: SummaryRequest = await request.json();
-    const { youtube_url, api_key, output_language, summary_type, custom_prompt } = data;
+    const { youtube_url, api_key, output_language, summary_type, custom_prompt, llm_provider } = data;
 
     if (!youtube_url || !api_key) {
       return new Response(
@@ -63,12 +87,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!api_key.startsWith('xai-')) {
-      return new Response(
-        JSON.stringify({ detail: "Invalid API key format. X.AI API keys should start with 'xai-'" }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
 
     const videoId = extractVideoId(youtube_url);
     if (!videoId) {
@@ -86,13 +104,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const config = LLM_CONFIGS[llm_provider];
+    if (!config) {
+      return new Response(
+        JSON.stringify({ detail: 'Invalid LLM provider selected' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const client = new OpenAI({
       apiKey: api_key,
-      baseURL: 'https://api.x.ai/v1'
+      baseURL: config.baseURL
     });
 
     const response = await client.chat.completions.create({
-      model: 'grok-beta',
+      model: config.model,
       messages: [
         { role: 'system', content: createSystemMessage(output_language) },
         { role: 'user', content: createPrompt(transcript, summary_type, output_language, custom_prompt) }
@@ -109,7 +135,7 @@ export async function POST(request: NextRequest) {
     const result: SummaryResponse = {
       success: true,
       summary: content.trim(),
-      model: 'grok-beta',
+      model: config.model,
       tokens: {
         total: response.usage?.total_tokens || 0,
         prompt: response.usage?.prompt_tokens || 0,

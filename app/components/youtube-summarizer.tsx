@@ -247,7 +247,9 @@ export default function YoutubeSummarizer() {
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder={`Enter your ${selectedLLM.toUpperCase()} API key...`}
+              placeholder={`Enter your ${selectedLLM === 'openai' ? 'OpenAI' : 
+                selectedLLM === 'xai' ? 'xAI' :
+                selectedLLM.charAt(0).toUpperCase() + selectedLLM.slice(1)} API key...`}
               className="flex-1"
             />
             <Select

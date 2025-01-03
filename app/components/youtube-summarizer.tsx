@@ -232,7 +232,7 @@ export default function YoutubeSummarizer() {
             />
             <Button 
               onClick={handlePasteYoutubeUrl}
-              className="bg-black hover:bg-black/90 text-white text-sm font-medium w-[23%]"
+              className="bg-black hover:bg-black/90 text-white text-[12px] sm:text-xs font-medium w-[23%] whitespace-normal h-auto min-h-[36px] py-1"
             >
               Paste URL (⌘Enter)
             </Button>
@@ -309,21 +309,21 @@ export default function YoutubeSummarizer() {
           <Button 
             onClick={handleFullSummary} 
             disabled={isLoading}
-            className="bg-black hover:bg-black/90 text-white text-sm font-medium w-full"
+            className="bg-black hover:bg-black/90 text-white text-[12px] sm:text-xs font-medium w-full whitespace-normal h-auto min-h-[36px] py-1"
           >
             {isLoading ? 'Generating...' : 'Full Summary (⌘F)'}
           </Button>
           <Button 
             onClick={handleShortSummary}
             disabled={isLoading}
-            className="bg-black hover:bg-black/90 text-white text-sm font-medium w-full"
+            className="bg-black hover:bg-black/90 text-white text-[12px] sm:text-xs font-medium w-full whitespace-normal h-auto min-h-[36px] py-1"
           >
             {isLoading ? 'Generating...' : 'Short Summary (⌘S)'}
           </Button>
           <Button 
             onClick={handleSubmitPrompt}
             disabled={isLoading || !customPrompt.trim()}
-            className="bg-black hover:bg-black/90 text-white text-sm font-medium w-full"
+            className="bg-black hover:bg-black/90 text-white text-[12px] sm:text-xs font-medium w-full whitespace-normal h-auto min-h-[36px] py-1"
           >
             {isLoading ? 'Generating...' : 'Submit Custom Prompt (⌘P)'}
           </Button>
@@ -371,19 +371,19 @@ export default function YoutubeSummarizer() {
           <div className="h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto">
             {summary ? (
               <div className="space-y-1">
-                <p><span className="font-semibold">Model:</span> {response?.model || 'grok-beta'}</p>
-                <p><span className="font-semibold">Total Tokens:</span> {response?.tokens?.total || 0}</p>
+                <p className="text-sm"><span className="font-semibold">Model:</span> {response?.model || 'grok-beta'}</p>
+                <p className="text-sm"><span className="font-semibold">Total Tokens:</span> {response?.tokens?.total || 0}</p>
                 <ul className="list-none pl-4 space-y-0.5">
-                  <li>
+                  <li className="text-sm">
                     <span className="font-medium">- Prompt Tokens:</span> {response?.tokens?.prompt || 0}
                   </li>
-                  <li>
+                  <li className="text-sm">
                     <span className="font-medium">- Completion Tokens:</span> {response?.tokens?.completion || 0}
                   </li>
                 </ul>
               </div>
             ) : (
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Processing information will appear here...
               </p>
             )}
@@ -394,53 +394,45 @@ export default function YoutubeSummarizer() {
         <div className="grid grid-cols-2 gap-4">
           {/* Feature Request Input */}
           <div>
-            <div className="flex justify-between items-center gap-2">
-              <div className="flex items-center gap-2">
-                <Label htmlFor="feature-request" className="font-bold whitespace-nowrap">Feature Request By</Label>
-                <Input
-                  id="requester-name"
-                  placeholder="name"
-                  value={requesterName}
-                  onChange={(e) => setRequesterName(e.target.value)}
-                  className="w-28 h-7 text-xs"
-                />
-              </div>
+            <Label htmlFor="feature-request" className="font-bold whitespace-nowrap">Feature Request</Label>
+            <div>
+              <Textarea 
+                id="feature-request" 
+                placeholder="Feel free to request new features here, it will be sent to Crimson's github repo as an issue…" 
+                value={featureRequest}
+                onChange={(e) => setFeatureRequest(e.target.value)}
+                className="h-[200px] resize-none overflow-y-auto text-sm"
+              />
+            </div>
+            <div className="mt-2 flex gap-2">
+              <Input
+                id="requester-name"
+                placeholder="name"
+                value={requesterName}
+                onChange={(e) => setRequesterName(e.target.value)}
+                className="flex-1 h-7 text-sm"
+              />
               <Button 
                 onClick={handleFeatureRequest}
                 disabled={!featureRequest.trim()}
-                className="bg-black hover:bg-black/90 text-white text-xs font-medium h-7 px-3"
+                className="bg-black hover:bg-black/90 text-white text-sm font-medium h-7 px-3 whitespace-nowrap"
               >
                 Send
               </Button>
-            </div>
-            <div className="mt-2">
-              <Textarea 
-                id="feature-request" 
-                placeholder="Feel free to request new features here, it will be sent to Crimson’s github repo as an issue…" 
-                value={featureRequest}
-                onChange={(e) => setFeatureRequest(e.target.value)}
-                className="h-[200px] resize-none overflow-y-auto"
-              />
             </div>
           </div>
 
           {/* Feature Request List */}
           <div>
-            <div className="flex justify-between items-center gap-2">
-              <Label className="font-bold">Feature Request List</Label>
-              <Input
-                className="w-28 h-7 text-xs invisible"
-                disabled
-              />
-            </div>
-            <div className="mt-2">
-              <div className="h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background overflow-y-auto">
+            <Label className="font-bold">Feature Request List</Label>
+            <div>
+              <div className="h-[233px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background overflow-y-auto">
                 {featureRequests.length > 0 ? (
                   <ul className="list-disc pl-5 space-y-2">
                     {[...featureRequests]
                       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
                       .map((request, index) => (
-                        <li key={index} className="text-sm">
+                        <li key={index} className="text-xs">
                           <span>{request.request_text}</span>
                           <div className="text-xs text-gray-500 mt-1">
                             <span>By: {request.requester_name}</span>
@@ -452,7 +444,7 @@ export default function YoutubeSummarizer() {
                       ))}
                   </ul>
                 ) : (
-                  <div className="text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     <p>Feature requests will appear here...</p>
                   </div>
                 )}

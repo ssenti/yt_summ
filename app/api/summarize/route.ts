@@ -59,7 +59,7 @@ interface LLMConfig {
 const LLM_CONFIGS: Record<string, LLMConfig> = {
   deepseek: {
     model: 'deepseek-chat',
-    baseURL: 'https://api.deepseek.com'
+    baseURL: 'https://api.deepseek.com/v1'
   },
   gemini: {
     model: 'gemini-2.0-flash-exp',
